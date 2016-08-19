@@ -1,17 +1,27 @@
 Package: MAsim
-Title: Posterior variance comparison simulation for MA partial regression coefficients
+Title: Posterior variance comparison simulation for MA partial regression
+    coefficients
 Version: 0.0.0.9000
 Authors@R: person(given = "Katharine", family = "Banner",
 	     email = "katharine.banner@gmail.com",
              role = c("aut", "cre"))
-Description: A package for comparing three posterior variances of partial regression coefficients resulting from model averaging implemented with the g-prior: (1) Model averaged to cts. component of model averaged, (2) cts. component of model averaged to top, and (3) model averaged to top. 
-Depends: R (>= 3.3.0),
-	  ggplot2, 
-	  BMS, 
-	  LearnBayes, 
-	  latex2exp, 
-	  beanplot, 
-	  tidyr
+Description: A package for comparing three posterior variances of partial
+    regression coefficients resulting from model averaging implemented with the
+    g-prior: (1) Model averaged to cts. component of model averaged, (2) cts.
+    component of model averaged to top, and (3) model averaged to top.
+Depends:
+    R (>= 3.3.0),
+    ggplot2,
+    BMS,
+    LearnBayes,
+    latex2exp,
+    beanplot,
+    tidyr
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1
