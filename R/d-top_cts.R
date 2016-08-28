@@ -302,6 +302,16 @@ plot_trt_compare <- function(df_vec, y, cor_x,
     xs2 <- unique(dat2$X)
     num_x <- dim(dat)[1]/length(xs)
     num_vars <- dim(dat)[2]
+    
+    ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
+                     ifelse(y == "d_topCts", 
+                            latex2exp::TeX("$Var_{cts}$ / $Var_{top}$"),
+                            ifelse(y == "d_topMA", 
+                                   latex2exp::TeX("$Var_{MA}$ / $Var_{top}$"), 
+                                   ifelse(y == "diff_ct", 
+                                          latex2exp::TeX("$SD_{cts} - SD_{top}$"), 
+                                          latex2exp::TeX("$SD_{MA} - SD_{top}$")))))
+    
     if(length(xs) < 5){
       xs <- c(xs, NA)
       m <- data.frame(rep(paste0("X", which(is.na(xs2))), num_x), 

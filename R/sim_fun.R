@@ -78,7 +78,7 @@ sim_d2 <- function(nsims, n = 60, p = 5, betas = c(0,0,0,1,1.2),
   for(i in 1:nsims){
     dat[[i]] <- data_sim(n = n, p = p, betas = betas, 
                          sig_y = sig_y, sig_x = sig_x, cor_x = cor_x, 
-                         cor_vars = cor_vars, tol = tol, truth4 = F)
+                         cor_vars = cor_vars, tol = tol, truth4 = truth4)
   }
   if (case == 1) {
     sum_dat <- lapply(dat, FUN = function(x){
