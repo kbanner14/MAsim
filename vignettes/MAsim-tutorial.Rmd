@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "MAsim-tutorial"
+author: "Katharine Banner"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,50 +9,239 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r funs, echo = FALSE, message=FALSE}
+devtools::load_all("../../MApp-Rpackage/MApp/.")
+devtools::load_all("../../MAsim/.")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+This vignette contains the R code used for simulating and displaying the results discussed in Chapter 3 of Katharine Banner's dissertation. 
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+# Simulation Code
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+The code provided in Katharine Banner's Github repositories `MAsim` ([https://github.com/kbanner14/MAsim](https://github.com/kbanner14/MAsim)) and `MApp-Rpackage/MApp` ([https://github.com/kbanner14/MApp-Rpackage/MApp](https://github.com/kbanner14/MApp-Rpackage/MApp)) contain all functions to recreate the results presented in Chapter 3. Both packages can be installed using `devtools::install_github()` or by downloading the repository and loading the packages using `devtools::load\_all("PATH/TO/MAsim/.")`. Once the packages are loaded, the user can generate the simulated results using the code in Section \ref{sec:recreate}. 
 
-## More Examples
+```{r load, echo = TRUE, cache = TRUE, eval = FALSE}
+# install MApp through github
+devtools::install_github("kbanner14/MApp-Rpackage", subdir = "MApp")
+# or load MApp from local directory
+devtools::load_all("PATH/TO/MApp-Rpackage-master/MApp/.")
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+# install MAsim through github
+devtools::install_github("kbanner14/MAsim")
+# or load MAsim from local directory
+devtools::load_all("PATH/TO/MAsim/.")
 ```
 
-Also a quote using `>`:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+# Recreate the Simulation
+\label{sec:recreate}
+
+The following code generates the same results presented in Chapter 3. 
+
+```{r dataGen, echo = TRUE, cache=TRUE}
+# reference case
+#~~~~~~~~~~~~~~~~~~~~#
+#  300 realizations  #
+#~~~~~~~~~~~~~~~~~~~~#
+
+set.seed(1)
+cor_0 <- sim_d2(300, cor_x = 0.0, tol = 0.01)
+
+set.seed(6)
+cor_3 <- sim_d2(300, cor_x = 0.3, tol = 0.01)
+
+set.seed(5)
+cor_6 <- sim_d2(300, cor_x = 0.6, tol = 0.01)
+
+set.seed(4)
+cor_7 <- sim_d2(300, cor_x = 0.7, tol = 0.01)
+
+set.seed(3)
+cor_8 <- sim_d2(300, cor_x = 0.8, tol = 0.01)
+
+set.seed(8)
+cor_9 <- sim_d2(300, cor_x = 0.9, tol = 0.01)
+
+df_vec <- c(cor_0, cor_3, cor_6, cor_7, cor_8, cor_9)
+
+# comparing signal to noise Truth = YES
+
+set.seed(1)
+cor_0s1 <- sim_d2(300, cor_x = 0.0, tol = 0.01, sig_y = 1)
+
+set.seed(6)
+cor_3s1 <- sim_d2(300, cor_x = 0.3, tol = 0.01, sig_y = 1)
+
+set.seed(5)
+cor_6s1 <- sim_d2(300, cor_x = 0.6, tol = 0.01, sig_y = 1)
+
+set.seed(4)
+cor_7s1 <- sim_d2(300, cor_x = 0.7, tol = 0.01, sig_y = 1)
+
+set.seed(3)
+cor_8s1 <- sim_d2(300, cor_x = 0.8, tol = 0.01, sig_y = 1)
+
+set.seed(8)
+cor_9s1 <- sim_d2(300, cor_x = 0.9, tol = 0.01, sig_y = 1)
+
+df_vec_s1 <- c(cor_0s1, cor_3s1, cor_6s1, cor_7s1, cor_8s1, cor_9s1)
+
+
+# comparing truth in the model set sig-y = low
+
+# NO5
+set.seed(1)
+cor_0n5 <- sim_d2(300, cor_x = 0.0, tol = 0.01, case = 2)
+
+set.seed(6)
+cor_3n5 <- sim_d2(300, cor_x = 0.3, tol = 0.01, case = 2)
+
+set.seed(5)
+cor_6n5 <- sim_d2(300, cor_x = 0.6, tol = 0.01, case = 2)
+
+set.seed(4)
+cor_7n5 <- sim_d2(300, cor_x = 0.7, tol = 0.01, case = 2)
+
+set.seed(3)
+cor_8n5 <- sim_d2(300, cor_x = 0.8, tol = 0.01, case = 2)
+
+
+set.seed(8)
+cor_9n5 <- sim_d2(300, cor_x = 0.9, tol = 0.01, case = 2)
+
+df_vec_n5 <- c(cor_0n5, cor_3n5, cor_6n5, cor_7n5, cor_8n5, cor_9n5)
+
+# NO 4 
+set.seed(1)
+cor_0n4 <- sim_d2(300, cor_x = 0.0, tol = 0.01, truth4 = T)
+
+set.seed(6)
+cor_3n4 <- sim_d2(300, cor_x = 0.3, tol = 0.01, truth4 = T)
+
+set.seed(5)
+cor_6n4 <- sim_d2(300, cor_x = 0.6, tol = 0.01, truth4 = T)
+
+set.seed(4)
+cor_7n4 <- sim_d2(300, cor_x = 0.7, tol = 0.01, truth4 = T)
+
+set.seed(3)
+cor_8n4 <- sim_d2(300, cor_x = 0.8, tol = 0.01, truth4 = T)
+
+set.seed(8)
+cor_9n4 <- sim_d2(300, cor_x = 0.9, tol = 0.01, truth4 = T)
+
+df_vec_n4 <- c(cor_0n4, cor_3n4, cor_6n4, cor_7n4, cor_8n4, cor_9n4)
+
+# comparing truth in the model set for sig to noise = High
+
+## truth = NO4, sig = 1
+
+set.seed(1)
+cor_0n41 <- sim_d2(300, cor_x = 0.0, tol = 0.01, truth4 = T, sig_y = 1)
+
+set.seed(6)
+cor_3n41 <- sim_d2(300, cor_x = 0.3, tol = 0.01, truth4 = T, sig_y = 1)
+
+set.seed(5)
+cor_6n41 <- sim_d2(300, cor_x = 0.6, tol = 0.01, truth4 = T, sig_y = 1)
+
+set.seed(4)
+cor_7n41 <- sim_d2(300, cor_x = 0.7, tol = 0.01, truth4 = T, sig_y = 1)
+
+set.seed(3)
+cor_8n41 <- sim_d2(300, cor_x = 0.8, tol = 0.01, truth4 = T, sig_y = 1)
+
+set.seed(8)
+cor_9n41 <- sim_d2(300, cor_x = 0.9, tol = 0.01, truth4 = T, sig_y = 1)
+
+df_vec_n41 <- c(cor_0n41, cor_3n41, cor_6n41, cor_7n41, cor_8n41, cor_9n41)
+
+# truth = NO5, sig = 1 
+
+set.seed(1)
+cor_0n51 <- sim_d2(300, cor_x = 0.0, tol = 0.01, case = 2, sig_y = 1)
+
+set.seed(6)
+cor_3n51 <- sim_d2(300, cor_x = 0.3, tol = 0.01, case = 2, sig_y = 1)
+
+set.seed(5)
+cor_6n51 <- sim_d2(300, cor_x = 0.6, tol = 0.01, case = 2, sig_y = 1)
+
+set.seed(4)
+cor_7n51 <- sim_d2(300, cor_x = 0.7, tol = 0.01, case = 2, sig_y = 1)
+
+set.seed(3)
+cor_8n51 <- sim_d2(300, cor_x = 0.8, tol = 0.01, case = 2, sig_y = 1)
+
+set.seed(8)
+cor_9n51 <- sim_d2(300, cor_x = 0.9, tol = 0.01, case = 2, sig_y = 1)
+
+df_vec_n51 <- c(cor_0n51, cor_3n51, cor_6n51, cor_7n51, cor_8n51, cor_9n51)
+```
+
+#Recreating Simulation Study Results
+
+We discussed results from select treatments in Chapter \ref{CH:3}. Here, we provide instructions for creating plots to summarize results from other treatments. For all of the plotting functions discussed below, the `y = "d"` tells the function to use $Var_{MA}/VAR_{Cts}$ as the response variable. The argument `y` can take on the following characters: $Var_{Cts}/Var_{top}$ = `"d_topCts"`, $Var_{MA}/Var_{top}$ = `"d_topMA"`, $SD_{MA} - SD_{top}$ = `diff_MAt`, and $SD_{Cts} - SD_{top}$ = `diff_ct`. 
+
+## Using `pres_d_plot` to Visualize Results
+
+Use `pres_d_plot` to plot results from all levels of correlation for fixed levels of truth in the model set and signal to noise. Specify the number of variables with `n_var` and the upper limit for the $y$-axis with `y_max`.
+
+```{r cor-ref, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8, cache= TRUE, fig.cap = "Low signal to noise, truth = YES, all correlations", fig.align = "center"}
+pres_d_plot(df_vec, y = "d", n_var = 5, y_max = 3.5)
+```
+
+Use `plot_order = "backward"` to plot results from $X_5$ first and $X_1$ last.
+
+```{r cor-ref2, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8, cache= TRUE, fig.cap = "Low signal to noise, truth = YES, all correlations, plotted X5:X1", fig.align = "center"}
+pres_d_plot(df_vec, y = "d", n_var = 5, plot_order = "backward", y_max = 3.5)
+```
+
+To create plots from different treatments use a different list of results (e.g., to plot results from high signal to noise and truth in the model set, use `df_vec_s1` in place of `df_vec`). 
+
+## Using `pres_y` to Visualize Results
+
+If you prefer looking at one individual treatment combination for all variables considered (in their own plots), use `pres_y`. You must specify the correlation with `cor_x` and you may specify a maximum value for the $y$-axis with `y_max`. Note, rather than using the list of results for all correlations and fixed levels of signal to noise and truth in the model set, use the individual results from one treatment. 
+
+```{r ind-ref, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8, cache= TRUE,fig.cap = "Low signal to noise, truth = YES, cor = 0.9", fig.align = "center" }
+pres_y(cor_9, y = "d", cor_x = 0.9, y_max = 3.5)
+```
+
+## Using `pres_trt_compare` to Visualize Results
+
+Use `pres_trt_compare` to compare results from two specific treatments. Here, I use this function to compare low signal to noise to high signal to noise for truth in the model set and correlation equal to 0.9. Specify the upper limit for the $y$-axis with `y_max`, the response variable with `y`, the correlation between $X_3$ and $X_5$ with `cor_x`, and labels for the treatments being compared with `labs`.
+
+
+```{r sig1-ref9, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8,fig.align = "center", fig.cap = "Comparing signal to noise: Low vs. High signal to noise, truth = YES, all correlations", cache= FALSE}
+pres_trt_comp(c(cor_9, cor_9s1), y = "d", cor_x = 0.9, 
+				labs = c("sig-y = 2.5, YES", "sig-y = 1, YES"), y_max = 3.5)
+```
+
+
+## Using `pres_y_compare` to Visualize Results
+
+Use `pres_y_compare` to compare results from two response variables for a particular treatment. Here, I use this function to compare $Var_{MA}/Var_{cts}$ to $Var_{MA}/Var_{top}$ for low signal to noise, truth in the model set, and correlation equal to 0.9. Specify the upper limit for the $y$-axis with `y_max`, the response variable with `y`, the correlation between $X_3$ and $X_5$ with `cor_x`, and labels for the ratios of variances being compared with `labs`.
+
+```{r sig2-yes9, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8,fig.align = "center", cache= TRUE, fig.cap = "Comparing two ratios of varainces: Low signal to noise, truth = YES, all correlations"}
+pres_y_comp(cor_9, y_vec = c("d", "d_topMA"), 
+			 labs = c("Var_MA/Var_cts", "Var_MA/Var_top"), cor_x = 0.9, y_max = 8)
+```
+
+
+## Using `final_bean_d` to Visualize Results 
+
+Use `final_bean_d` to visualize results for $Var_{cts}/Var_{top}$ across all correlations for fixed levels of signal to noise and truth in the model set.  
+
+```{r bean-all, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8,fig.align = "center", cache= TRUE, fig.cap="Low signal to noise, truth = YES, cor = 0.9"}
+final_bean_d(df_vec, y = "d_topCts")
+```
+
+
+## Using `final_bean_diff` to Visualize Results 
+
+Use `final_bean_diff` to visualize results for $SD_{MA} - SD_{cts}$ across all correlations for fixed levels of signal to noise and truth in the model set.  
+
+```{r bean-diff, echo = TRUE, out.width='.7\\linewidth', fig.width = 10, fig.height = 8,fig.align = "center", cache= TRUE, fig.cap="Low signal to noise, truth = YES, cor = 0.9"}
+final_bean_d(df_vec, y = "d_topCts")
+```
+
