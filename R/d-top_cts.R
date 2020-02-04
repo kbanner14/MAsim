@@ -1038,14 +1038,7 @@ ggprocess <- function(df_vec, cor_vec = c(0.0,0.3,0.6,0.7,0.8,0.9), y = "d",
   return(df_out)
 }
 
-test <- ggprocess(df_vec = df_vec)
-head(test)
-summary(test)
-df_plot <- test
-### some exploratory plots 
 
-# keeping data realizations together and plotting one 
-# iteration at a time...
 many_iter_viz <- function(df_plot, n_iter = 10, y = "d"){
   n_sim <- max(as.numeric(df_plot$iter))
   idx <- sample(x = 1:n_sim, size = n_iter, rep = F)
