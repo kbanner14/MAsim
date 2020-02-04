@@ -1015,3 +1015,166 @@ final_bean_diff <- function(df_vec, y,
     j <- j + 1
   }
 }
+
+
+ggprocess <- function(df_vec, cor_vec = c(0.0,0.3,0.6,0.7,0.8,0.9), y = "d", 
+                      cols = c('#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8','#253494')){
+  idx <- which(names(df_vec) == "summary")
+  df_out <- data.frame()
+  for(i in 1:length(idx)){
+    dat <- df_vec[[idx[i]]]
+    dat$max_y <- max(dat[,y], na.rm = T) + sd(dat[,y], na.rm = T)/4
+    df_out <- rbind(df_out, dat)
+  }
+  df_out$col <- ifelse(df_out$X == "X1", cols[1], 
+                       ifelse(df_out$X == "X2", cols[2], 
+                              ifelse(df_out$X == "X3", cols[3], 
+                                     ifelse(df_out$X == "X4", cols[4], cols[5]))))
+  df_out$cor_x <- factor(df_out$cor_x) 
+  levels(df_out$cor_x) <- paste("Cor(X3,X5) =", cor_vec)
+  df_out$iter <- factor(df_out$iter)
+  df_out$PEP <- 1-df_out$PIP
+  df_out$id <- interaction(df_out$cor_x, df_out$iter)
+  return(df_out)
+}
+
+test <- ggprocess(df_vec = df_vec)
+head(test)
+summary(test)
+df_plot <- test
+### some exploratory plots 
+
+# keeping data realizations together and plotting one 
+# iteration at a time...
+many_iter_viz <- function(df_plot, n_iter = 10, y = "d"){
+  n_sim <- max(as.numeric(df_plot$iter))
+  idx <- sample(x = 1:n_sim, size = n_iter, rep = F)
+  ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
+                   ifelse(y == "d_topCts", 
+                          latex2exp::TeX("$Var_{cts}$ / $Var_{top}$"),
+                          ifelse(y == "d_topMA", 
+                                 latex2exp::TeX("$Var_{MA}$ / $Var_{top}$"), 
+                                 ifelse(y == "diff_ct", 
+                                        latex2exp::TeX("$SD_{cts} - SD_{top}$"), 
+                                        latex2exp::TeX("$SD_{MA} - SD_{top}$")))))
+  df_sub <- subset(df_plot, as.numeric(df_plot$iter) %in% idx)
+  ggplot2::ggplot(data = df_sub, ggplot2::aes(x = PEP, y = df_sub[,y], 
+                                              col = X)) + 
+    annotate("rect", xmin = 0, ymin = 1, xmax = 1, 
+             ymax = max(df_plot[,y], na.rm = T), alpha = 0.2, 
+             fill = "red") + 
+    annotate("rect", xmin = 0, ymin = 0, xmax = 0.5, 
+             ymax = max(df_plot[,y], na.rm = T), alpha = 0.2, 
+             fill = "blue") +
+    geom_point(size = 3) + 
+    geom_text(label = as.character(df_sub$X), 
+              nudge_y = 0.5, nudge_x = 0.1) + 
+    facet_grid(iter ~ cor_x) + 
+    scale_color_manual(values = c("#fc8d62", "#fc8d62", "#999999",
+                                  "#4d4d4d","#4d4d4d")) +
+    # scale_shape_manual(values = c(16,17,8,15,18)) + 
+    ylab(ylabel) + 
+    theme_bw() + 
+    theme(legend.position = "n") 
+}
+
+# create a plot with the iterations that are good for 
+many_iter_viz2 <- function(df_plot, n_iter = 10, y = "d"){
+  n_sim <- max(as.numeric(df_plot$iter))
+  idx <- sample(x = 1:n_sim, size = n_iter, rep = F)
+  ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
+                   ifelse(y == "d_topCts", 
+                          latex2exp::TeX("$Var_{cts}$ / $Var_{top}$"),
+                          ifelse(y == "d_topMA", 
+                                 latex2exp::TeX("$Var_{MA}$ / $Var_{top}$"), 
+                                 ifelse(y == "diff_ct", 
+                                        latex2exp::TeX("$SD_{cts} - SD_{top}$"), 
+                                        latex2exp::TeX("$SD_{MA} - SD_{top}$")))))
+  df_sub <- subset(df_plot, as.numeric(df_plot$iter) %in% idx)
+  ggplot2::ggplot(data = df_sub, ggplot2::aes(x = PEP, y = df_sub[,y], 
+                                              shape = X, col = as.numeric(iter))) + 
+    annotate("rect", xmin = 0, ymin = 1, xmax = 1, 
+             ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+             fill = "gray") + 
+    annotate("rect", xmin = 0, ymin = 0, xmax = 0.5, 
+             ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+             fill = "gray") +
+    geom_point(size = 3) + 
+    # geom_line(lty = 2, lwd = 0.5) +
+    # geom_text(label = as.character(df_sub$X), 
+    #           nudge_y = 0.5, nudge_x = 0.1) + 
+    facet_wrap(~cor_x, ncol = 6) + 
+    scale_shape_manual(values = c(16,17,8,15,18)) + 
+    ylab(ylabel) + 
+    theme_bw() 
+}
+
+# similar to original plotting function with each cor 
+# in a panel and all vars in all plots, can use subset 
+# of df to look at just one cor, compare some, or all. 
+# option to highlight one iteration of simulation to see 
+# where the individual PRCs fall under treatment levels
+many_sims_viz <- function(df_plot, y = "d", alpha = 0.4, 
+                          highlight = FALSE, sim_i = NULL){
+  if(highlight == TRUE & is.null(sim_i)) {
+    message("Must specify an iteration to highlight")
+  }
+  if(highlight == FALSE){
+    ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
+                     ifelse(y == "d_topCts", 
+                            latex2exp::TeX("$Var_{cts}$ / $Var_{top}$"),
+                            ifelse(y == "d_topMA", 
+                                   latex2exp::TeX("$Var_{MA}$ / $Var_{top}$"), 
+                                   ifelse(y == "diff_ct", 
+                                          latex2exp::TeX("$SD_{cts} - SD_{top}$"), 
+                                          latex2exp::TeX("$SD_{MA} - SD_{top}$")))))
+    ggplot2::ggplot(data = df_plot, ggplot2::aes(x = PEP, y = df_plot[,y], col = X)) + 
+      annotate("rect", xmin = 0, ymin = 1, xmax = 1, 
+               ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+               fill = "gray") + 
+      annotate("rect", xmin = 0, ymin = 0, xmax = 0.5, 
+               ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+               fill = "gray") +
+      geom_point(size = 3, alpha = alpha) + 
+      facet_wrap(~cor_x) + 
+      ylab(ylabel) + 
+      scale_color_manual(values = c('#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8','#253494')) + 
+      theme_bw()   
+  } else {
+    df_plot$iter_num <- as.numeric(df_plot$iter)
+    df_highlight <- subset(df_plot, iter_num == sim_i)
+    ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
+                     ifelse(y == "d_topCts", 
+                            latex2exp::TeX("$Var_{cts}$ / $Var_{top}$"),
+                            ifelse(y == "d_topMA", 
+                                   latex2exp::TeX("$Var_{MA}$ / $Var_{top}$"), 
+                                   ifelse(y == "diff_ct", 
+                                          latex2exp::TeX("$SD_{cts} - SD_{top}$"), 
+                                          latex2exp::TeX("$SD_{MA} - SD_{top}$")))))
+    ggplot2::ggplot(data = df_plot, ggplot2::aes(x = PEP, 
+                                                 y = df_plot[,y], col = X)) + 
+      annotate("rect", xmin = 0, ymin = 1, xmax = 1, 
+               ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+               fill = "gray") + 
+      annotate("rect", xmin = 0, ymin = 0, xmax = 0.5, 
+               ymax = max(df_plot[,y], na.rm = T), alpha = 0.4, 
+               fill = "gray") +
+      geom_point(size = 3, alpha = alpha) + 
+      geom_point(data = df_highlight, 
+                 aes(x = PEP, y = df_highlight[,y]), 
+                 size = 4, col = "#f0027f", shape = 18) +
+      geom_label(data = df_highlight, label = as.character(df_highlight$X), 
+                 aes(x = PEP, y = df_highlight[,y]), 
+                 nudge_x = 0.1, nudge_y = 0.1) + 
+      geom_point(data = df_highlight, 
+                 aes(x = PEP, y = df_highlight[,y], col = X), 
+                 size = 1, shape = 18) +
+      facet_wrap(~cor_x) + 
+      ylab(ylabel) + 
+      scale_color_manual(values = c('#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8','#253494')) + 
+      theme_bw(base_size = 14) + 
+      theme(legend.position = "none")
+    
+  }
+  
+}
