@@ -856,8 +856,7 @@ final_bean_diff <- function(df_vec, y,
 }
 
 # processing fun
-ggprocess <- function(df_vec, cor_vec = c(0.0,0.3,0.6,0.7,0.8,0.9), y = "d", 
-                      cols = c('#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8','#253494')){
+ggprocess <- function(df_vec, y = "d"){
   idx <- which(names(df_vec) == "summary")
   df_out <- data.frame()
   for(i in 1:length(idx)){
@@ -865,10 +864,6 @@ ggprocess <- function(df_vec, cor_vec = c(0.0,0.3,0.6,0.7,0.8,0.9), y = "d",
     dat$max_y <- max(dat[,y], na.rm = T) + sd(dat[,y], na.rm = T)/4
     df_out <- rbind(df_out, dat)
   }
-  df_out$col <- ifelse(df_out$X == "X1", cols[1], 
-                       ifelse(df_out$X == "X2", cols[2], 
-                              ifelse(df_out$X == "X3", cols[3], 
-                                     ifelse(df_out$X == "X4", cols[4], cols[5]))))
   df_out$cor_x <- factor(df_out$cor_x) 
   levels(df_out$cor_x) <- paste("Cor(X3,X5) =", cor_vec)
   df_out$iter <- factor(df_out$iter)
@@ -1142,14 +1137,12 @@ many_sims_corviz <- function(df_vec, y = "d", alpha = 0.4,
 
 # Compare treatments for all correlations on one plot
 # or just save this info in the df_summ created by sim_d2new...
-df_list <- list(df_vec, df_vec_s1)
-
 sims_trt_compare <- function(df_list, trt_labels, y = "d", alpha = 0.4, 
                                                highlight = FALSE, 
                              iter_idx = NULL, n_iter = 5){
   df_plot <- data.frame()
   for(i in 1:length(df_list)){
-    df <- ggprocess(df_vec = df_list[[i]])
+    df <- ggprocess(df_vec = df_list[[i]], y = y)
     df$trt <- trt_labels[i]
     df_plot <- rbind(df_plot, df)
   }

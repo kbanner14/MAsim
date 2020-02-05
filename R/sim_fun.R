@@ -227,7 +227,6 @@ sim_d2new <- function(nsims, n = 60, p = 5, betas = c(0,0,0,1,1.2),
       df_summ$iter <- i
       d <- rbind(d, df_summ)
     }
-    
     # create more summary measures
     d$var_top[d$var_top == 0] <- NA
     d$d_topMA <- d$var_ma/d$var_top
@@ -237,6 +236,7 @@ sim_d2new <- function(nsims, n = 60, p = 5, betas = c(0,0,0,1,1.2),
     out[[2]] <- d
     names(out) <- c("dat", "summary")
   }
+  
   return(out)
 }
 
