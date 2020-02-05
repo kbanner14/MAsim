@@ -216,8 +216,8 @@ sim_d2new <- function(nsims, n = 60, p = 5, betas = c(0,0,0,1,1.2),
       d <- vars[,1]/vars[,2]
       names(d) <- dimnames(vars)[[1]]
       PIP <- coef(dat_bms)[order(coef(dat_bms)[,5]), ][,1]
-      return(data.frame(X = names(x[2:6])), cor_x, 
-             d, PIP, var_ma, var_cts, var_top)
+      return(data.frame(X = names(x[2:5]), cor_x, 
+             d, PIP, var_ma, var_cts, var_top))
     }
     ) 
     
