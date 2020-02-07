@@ -49,7 +49,9 @@ compare_varMActs <- function(df_vec, y){
 # processing fun to take summary data frame from many scenarios 
 # and create df for plotting/summarizing results
 
-ggprocess <- function(df_vec, y = "d"){
+ggprocess <- function(df_vec, y = "d", 
+                      cor_vec = c(0.0, 0.3, 0.6, 
+                                  0.7, 0.8, 0.9)){
   idx <- which(names(df_vec) == "summary")
   df_out <- data.frame()
   for(i in 1:length(idx)){
@@ -66,8 +68,11 @@ ggprocess <- function(df_vec, y = "d"){
 }
 
 # individual iterations on cleaner plot without all simulation results 
-many_iter_viz <- function(df_vec, n_iter = 10, y = "d"){
-  df_plot <- ggprocess(df_vec)
+many_iter_viz <- function(df_vec, n_iter = 10, y = "d", 
+                          cor_vec = c(0.0, 0.3, 0.6, 
+                                      0.7, 0.8, 0.9)){
+  df_plot <- ggprocess(df_vec, y = y, 
+                       cor_vec = cor_vec)
   n_sim <- max(as.numeric(df_plot$iter))
   idx <- sample(x = 1:n_sim, size = n_iter, rep = F)
   ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
@@ -100,8 +105,11 @@ many_iter_viz <- function(df_vec, n_iter = 10, y = "d"){
 }
 
 # create a plot with the iterations that are good for 
-many_iter_viz2 <- function(df_vec, n_iter = 10, y = "d"){
-  df_plot <- ggprocess(df_vec)
+many_iter_viz2 <- function(df_vec, n_iter = 10, y = "d", 
+                           cor_vec = c(0.0, 0.3, 0.6, 
+                                       0.7, 0.8, 0.9)){
+  df_plot <- ggprocess(df_vec, y = y, 
+                       cor_vec = cor_vec)
   n_sim <- max(as.numeric(df_plot$iter))
   idx <- sample(x = 1:n_sim, size = n_iter, rep = F)
   ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
@@ -138,11 +146,14 @@ many_iter_viz2 <- function(df_vec, n_iter = 10, y = "d"){
 # where the individual PRCs fall under treatment levels
 many_sims_viz <- function(df_vec, y = "d", alpha = 0.4, 
                           highlight = FALSE, sim_i = NULL, 
-                          plot_order = "backward"){
+                          plot_order = "backward", 
+                          cor_vec = c(0.0, 0.3, 0.6, 
+                                      0.7, 0.8, 0.9)){
   if(highlight == TRUE & is.null(sim_i)) {
     message("Must specify an iteration to highlight")
   }
-  df_plot <- ggprocess(df_vec = df_vec)
+  df_plot <- ggprocess(df_vec = df_vec, y = y, 
+                       cor_vec = cor_vec)
   if(plot_order == "backward"){
     df_plot <- df_plot[order(df_plot[,"X"], decreasing = T), ]  
   } else {
@@ -202,8 +213,11 @@ many_sims_viz <- function(df_vec, y = "d", alpha = 0.4,
 # facet grid instead of facet wrap to put all Cor and Xs in separate plot
 # for one treatment
 many_sims_full <- function(df_vec, y = "d", alpha = 0.4, 
-                          highlight = FALSE, iter_idx = NULL, n_iter = 5){
-  df_plot <- ggprocess(df_vec = df_vec)
+                          highlight = FALSE, iter_idx = NULL, n_iter = 5, 
+                          cor_vec = c(0.0, 0.3, 0.6, 
+                                      0.7, 0.8, 0.9)){
+  df_plot <- ggprocess(df_vec = df_vec, y = y, 
+                       cor_vec = cor_vec)
   if(highlight == FALSE){
     ylabel <- ifelse(y == "d", latex2exp::TeX("$Var_{MA}$ / $Var_{cts}$"),
                      ifelse(y == "d_topCts", 
@@ -259,11 +273,15 @@ many_sims_full <- function(df_vec, y = "d", alpha = 0.4,
 
 # facet by X and color by correlation for one treatment
 many_sims_corviz <- function(df_vec, y = "d", alpha = 0.4, 
-                          highlight = FALSE, sim_i = NULL, plot_order = "backward"){
+                          highlight = FALSE, sim_i = NULL, 
+                          plot_order = "backward", 
+                          cor_vec = c(0.0, 0.3, 0.6, 
+                                      0.7, 0.8, 0.9)){
   if(highlight == TRUE & is.null(sim_i)) {
     message("Must specify an iteration to highlight")
   }
-  df_plot <- ggprocess(df_vec = df_vec)
+  df_plot <- ggprocess(df_vec = df_vec, y = y, 
+                       cor_vec = cor_vec)
   if(plot_order == "backward"){
     df_plot <- df_plot[order(df_plot[,"cor_x"], decreasing = T), ]  
   } else {
@@ -331,11 +349,14 @@ many_sims_corviz <- function(df_vec, y = "d", alpha = 0.4,
 # Compare treatments for all correlations on one plot
 # or just save this info in the df_summ created by sim_d2new...
 sims_trt_compare <- function(df_list, trt_labels, y = "d", alpha = 0.4, 
+                             cor_vec = c(0.0, 0.3, 0.6, 
+                                         0.7, 0.8, 0.9), 
                              cols = c("#ffffb2","#f1a340", 
                                       "#c7e9b4", "#bcbddc", "#f6e8c3","#fa9fb5" )){
   df_plot <- data.frame()
   for(i in 1:length(df_list)){
-    df <- ggprocess(df_vec = df_list[[i]], y = y)
+    df <- ggprocess(df_vec = df_list[[i]], y = y, 
+                    cor_vec = cor_vec)
     df$trt <- trt_labels[i]
     df_plot <- rbind(df_plot, df)
   }
@@ -366,13 +387,15 @@ sims_trt_compare <- function(df_list, trt_labels, y = "d", alpha = 0.4,
 # all x_s on one plot for each COR, but facet grid by trt label. 
 many_trt_viz <- function(df_list, trt_labels, y = "d", alpha = 0.4, 
                           highlight = FALSE, sim_i = NULL, 
-                          plot_order = "backward"){
+                          plot_order = "backward", 
+                         cor_vec = c(0.0, 0.3, 0.6, 
+                                     0.7, 0.8, 0.9)){
   if(highlight == TRUE & is.null(sim_i)) {
     message("Must specify an iteration to highlight")
   }
   df_plot <- data.frame()
   for(i in 1:length(df_list)){
-    df <- ggprocess(df_vec = df_list[[i]], y = y)
+    df <- ggprocess(df_vec = df_list[[i]], y = y, cor_vec = cor_vec)
     df$trt <- trt_labels[i]
     df_plot <- rbind(df_plot, df)
   }
